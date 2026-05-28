@@ -1,0 +1,13 @@
+# Backend
+event-ticketing-system/target/
+event-ticketing-system/.idea/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Env files
+.env
+
+# Logs
+.log
