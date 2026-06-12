@@ -1,28 +1,14 @@
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
-export default function AppLayout({
-    children
-}) {
-
+export default function AppLayout({ children }) {
     return (
-
         <div className="flex min-h-screen flex-col bg-slate-50">
-
             <Navbar />
-
             <main className="flex-1">
-
-                <div className="mx-auto max-w-[1200px] px-6 py-10">
-
-                    {children}
-
-                </div>
-
+                {children}
             </main>
-
             <Footer />
-
         </div>
     );
 }

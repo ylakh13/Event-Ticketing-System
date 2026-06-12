@@ -10,13 +10,18 @@ export default function EventCard({
     event
 }) {
 
+    const ticketsRemaining = (event.totalTicketsAvailable ?? 0) - (event.ticketsSold ?? 0);
+
     return (
 
-        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+        <Link
+            to={`/events/${event.id}`}
+            className="block overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+        >
 
             {/* Image Placeholder */}
 
-            <div className="h-48 bg-slate-100" />
+            <div className="h-48 bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400" />
 
             {/* Content */}
 
@@ -26,7 +31,7 @@ export default function EventCard({
 
                 <p className="text-sm font-medium text-indigo-600">
 
-                    {event.organizer}
+                    {event.organizerName}
 
                 </p>
 
@@ -47,7 +52,7 @@ export default function EventCard({
                         <CalendarDays size={16} />
 
                         <span>
-                            {event.date}
+                            {new Date(event.dateTime).toLocaleString()}
                         </span>
 
                     </div>
@@ -67,7 +72,7 @@ export default function EventCard({
                         <Ticket size={16} />
 
                         <span>
-                            {event.ticketsRemaining} tickets remaining
+                            {ticketsRemaining} tickets remaining
                         </span>
 
                     </div>
@@ -86,7 +91,7 @@ export default function EventCard({
 
                         <h4 className="text-lg font-bold text-slate-900">
 
-                            INR {event.price}
+                            INR {event.ticketPrice}
 
                         </h4>
 
@@ -105,6 +110,6 @@ export default function EventCard({
 
             </div>
 
-        </div>
+        </Link>
     );
 }
