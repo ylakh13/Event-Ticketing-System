@@ -5,11 +5,16 @@ import com.eventticketing.dto.EventResponse;
 import com.eventticketing.dto.PlatformAnalyticsResponse;
 import com.eventticketing.dto.UpdateUserRoleRequest;
 import com.eventticketing.entity.Event;
+import com.eventticketing.entity.Order;
 import com.eventticketing.entity.User;
+import com.eventticketing.exception.ResourceNotFoundException;
 import com.eventticketing.repository.EventRepository;
+import com.eventticketing.repository.OrderRepository;
+import com.eventticketing.repository.TicketRepository;
 import com.eventticketing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,6 +26,10 @@ public class AdminService {
     private final UserRepository userRepository;
 
     private final EventRepository eventRepository;
+
+    private final TicketRepository ticketRepository;
+
+    private final OrderRepository orderRepository;
 
     public List<AdminUserResponse> getAllUsers() {
         List<User> users = userRepository.findAll();
@@ -69,17 +78,34 @@ public class AdminService {
                 .build();
     }
 
+    @Transactional
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<Event> userEvents = eventRepository.findByOrganizer(user);
+
+        for (Event event: userEvents) {
+            ticketRepository.deleteByEvent(event);
+        }
+
+        List<Order> userOrders = orderRepository.findByUser(user);
+        for (Order order : userOrders) {
+            ticketRepository.deleteByOrder(order);
+            orderRepository.delete(order);
+        }
+
+        eventRepository.deleteAll(userEvents);
 
         userRepository.delete(user);
     }
 
+    @Transactional
     public void deleteEvent(Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
+        ticketRepository.deleteByEvent(event);
         eventRepository.delete(event);
     }
 

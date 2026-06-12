@@ -13,65 +13,124 @@ import UserTicketsPage from "./pages/UserTicketsPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrganizerDashboardPage from "./pages/OrganizerDashboardPage";
 import AdminDashBoardPage from "./pages/AdminDashBoardPage";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import CreateEventPage from "./pages/CreateEventPage";
+import { Toaster } from "react-hot-toast";
 
 
 function App() {
-  return(
+  return (
 
     <BrowserRouter>
-    
-    <AppLayout>
 
-      <Routes>
+      <Toaster position="top-right" />
 
-        <Route path="/" element={
+      <AppLayout>
+
+        <Routes>
+
+          <Route path="/" element={
             <LandingPage />
-        }
-        />
+          }
+          />
 
-        <Route path="/events" element={
+          <Route path="/events" element={
             <EventsPage />
-        }
-        />
+          }
+          />
 
-        <Route path="/events/:id" element={
+          <Route path="/events/:id" element={
             <EventDetailsPage />
-        }
-        />
+          }
+          />
 
-        <Route path="/login" element={
+          <Route path="/login" element={
             <LoginPage />
-        }
-        />
+          }
+          />
 
-        <Route path="/register" element={
+          <Route path="/register" element={
             <RegisterPage />
-        }
-        />
+          }
+          />
 
-        <Route path="/tickets" element={
-            <UserTicketsPage />
-        }
-        />
+          <Route path="/tickets"
+            element={
+              <ProtectedRoute
+                allowedRoles={["ROLE_USER"]}>
+                <UserTicketsPage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/checkout/:eventId" element={
-            <CheckoutPage />
-        }
-        />
+          <Route
+            path="/checkout/:eventId"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "ROLE_USER"
+                ]}
+              >
+                <CheckoutPage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/organizer" element={
-            <OrganizerDashboardPage />
-        }
-        />
+          <Route
+            path="/organizer"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "ROLE_ORGANIZER"
+                ]}
+              >
+                <OrganizerDashboardPage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/admin" element={ 
-          <AdminDashBoardPage />
-        }
-        />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "ROLE_ADMIN"
+                ]}
+              >
+                <AdminDashBoardPage />
+              </ProtectedRoute>
+            }
+          />
 
-      </Routes>
+          <Route
+            path="/organizer/events/new"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "ROLE_ORGANIZER"
+                ]}
+              >
+                <CreateEventPage />
+              </ProtectedRoute>
+            }
+          />
 
-    </AppLayout> 
+          <Route
+            path="/organizer/events/:id/edit"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "ROLE_ORGANIZER"
+                ]}
+              >
+                <CreateEventPage />
+              </ProtectedRoute>
+            }
+          />
+
+        </Routes>
+
+      </AppLayout>
 
     </BrowserRouter>
   )

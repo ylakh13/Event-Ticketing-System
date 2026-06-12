@@ -7,6 +7,8 @@ import com.eventticketing.dto.OrganizerDashboardResponse;
 import com.eventticketing.entity.Event;
 import com.eventticketing.entity.Ticket;
 import com.eventticketing.entity.User;
+import com.eventticketing.exception.ResourceNotFoundException;
+import com.eventticketing.exception.UnauthorizedAccessException;
 import com.eventticketing.repository.EventRepository;
 import com.eventticketing.repository.TicketRepository;
 import com.eventticketing.repository.UserRepository;
@@ -37,11 +39,8 @@ public class EventService {
 
         String userEmail = authentication.getName();
 
-        User organizer = userRepository.findByEmail(userEmail);
-
-        if(organizer == null) {
-            throw new RuntimeException("User not found");
-        }
+        User organizer = userRepository.findByEmail (userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Event event = Event.builder()
                 .title(request.getTitle())
@@ -60,19 +59,19 @@ public class EventService {
 
     public EventResponse getEventById(Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
         return mapToEventResponse(event);
     }
 
     public EventResponse updateEvent(Long eventId, CreateEventRequest request) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
         String currentUserEmail = getCurrentUserEmail();
 
         if(!event.getOrganizer().getEmail().equals(currentUserEmail)) {
-            throw new RuntimeException("You are not authorized to update this event");
+            throw new UnauthorizedAccessException("You are not authorized to update this event");
         }
 
         event.setTitle(request.getTitle());
@@ -90,11 +89,8 @@ public class EventService {
     public List<EventResponse> getMyEvents() {
         String currentUserEmail = getCurrentUserEmail();
 
-        User organizer = userRepository.findByEmail(currentUserEmail);
-
-        if(organizer == null) {
-            throw new RuntimeException("User not found");
-        }
+        User organizer = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         List<Event> events = eventRepository.findByOrganizer(organizer);
 
@@ -105,7 +101,7 @@ public class EventService {
 
     public void deleteEvent(Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -170,7 +166,7 @@ public class EventService {
 
     public OrganizerDashboardResponse getOrganizerDashboard(Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
         String currentUserEmail = getCurrentUserEmail();
 
@@ -193,7 +189,7 @@ public class EventService {
 
     public List<AttendeeResponse> getEventAttendees(Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
         String currentUserEmail = getCurrentUserEmail();
 

@@ -4,6 +4,8 @@ import com.eventticketing.dto.CheckoutRequest;
 import com.eventticketing.dto.CheckoutResponse;
 import com.eventticketing.dto.TicketResponse;
 import com.eventticketing.entity.*;
+import com.eventticketing.exception.BusinessRuleException;
+import com.eventticketing.exception.ResourceNotFoundException;
 import com.eventticketing.repository.EventRepository;
 import com.eventticketing.repository.OrderRepository;
 import com.eventticketing.repository.UserRepository;
@@ -48,12 +50,12 @@ public class OrderService {
         Event event = eventRepository.findByIdForUpdate(
                 request.getEventId()
         ).orElseThrow(() ->
-                new RuntimeException(
+                new ResourceNotFoundException(
                         "Event not found with id: " + request.getEventId()
                 ));
 
         if (request.getQuantity() == null || request.getQuantity() <= 0) {
-            throw new RuntimeException("Quantity must be greater than 0");
+            throw new BusinessRuleException("Quantity must be greater than 0");
         }
 
         int remainingTickets = event.getTotalTicketsAvailable() - event.getTicketsSold();
@@ -109,24 +111,20 @@ public class OrderService {
         Event event = eventRepository.findByIdForUpdate(
                 Long.valueOf(eventId)
         ).orElseThrow(() ->
-                new RuntimeException(
+                new ResourceNotFoundException(
                         "Event not found"
                 ));
 
         User user = userRepository.findByEmail(
                 userEmail
-        );
-
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
+        ).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         int ticketQuantity = Integer.parseInt(quantity);
 
         int remainingTickets = event.getTotalTicketsAvailable() - event.getTicketsSold();
 
         if (remainingTickets < ticketQuantity) {
-            throw new RuntimeException(
+            throw new BusinessRuleException(
                     "Not enough tickets available."
             );
         }
@@ -183,11 +181,8 @@ public class OrderService {
 
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        User user = userRepository.findByEmail(userEmail);
-
-        if(user == null) {
-            throw new RuntimeException("User not found");
-        }
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         List<Order> orders = orderRepository.findByUser(user);
 

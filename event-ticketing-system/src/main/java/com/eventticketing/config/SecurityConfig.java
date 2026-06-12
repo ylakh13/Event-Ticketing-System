@@ -38,6 +38,11 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/**")
                     .permitAll()
 
+                    .requestMatchers(
+                            "/swagger-ui/**",
+                            "/v3/api-docs/**"
+                    ).permitAll()
+
                     .requestMatchers(HttpMethod.GET,
                             "/api/events",
                             "/api/events/**"
@@ -77,7 +82,10 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of(
+                        "http://localhost:5173",
+                        "http://localhost:3000"
+                )
         );
 
         configuration.setAllowedMethods(

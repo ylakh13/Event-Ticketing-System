@@ -5,6 +5,7 @@ import com.eventticketing.dto.LoginRequest;
 import com.eventticketing.dto.RegisterRequest;
 import com.eventticketing.entity.Role;
 import com.eventticketing.entity.User;
+import com.eventticketing.exception.BusinessRuleException;
 import com.eventticketing.repository.UserRepository;
 import com.eventticketing.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -25,19 +26,19 @@ public class AuthService {
     private final JwtService jwtService;
 
     public AuthResponse register(RegisterRequest request) {
-        if(userRepository.findByEmail(request.getEmail()) != null) {
-            throw new RuntimeException("Email already exists");
+        if (userRepository.findByEmail(request.getEmail().toLowerCase().trim()).isPresent()) {
+            throw new BusinessRuleException("Email already exists");
         }
 
         Role role = request.getRole();
 
         if(role == Role.ROLE_ADMIN) {
-            throw new RuntimeException("Admin registration is not allowed");
+            throw new BusinessRuleException("Admin registration is not allowed");
         }
 
         User user = User.builder()
                 .name(request.getName())
-                .email(request.getEmail())
+                .email(request.getEmail().toLowerCase().trim())
                 .password(
                         passwordEncoder.encode(
                                 request.getPassword()
@@ -66,11 +67,8 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail());
-
-        if(user == null) {
-            throw new BadCredentialsException("Invalid email or password");
-        }
+        User user = userRepository.findByEmail(request.getEmail().toLowerCase().trim())
+                .orElseThrow(() -> new BadCredentialsException("User not found"));
 
         boolean passwordMatches =
                 passwordEncoder.matches(
