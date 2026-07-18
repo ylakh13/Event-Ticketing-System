@@ -2,9 +2,6 @@
 
 A full-stack event ticketing platform built with Spring Boot and React. Users can discover and book events, organizers can manage ticket sales, and admins can oversee the entire platform.
 
-## 🚀 Live Demo
-> Coming soon after deployment
-
 ## ✨ Features
 
 ### For Users
